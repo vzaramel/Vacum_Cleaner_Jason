@@ -5,7 +5,9 @@ MAS vacuum_cleaner {
 	environment: env.CleanerWorld
 
 	agents:
-		cleaner1 cleaner;
+		cleaner1 cleaner_aspirador;
+		cleaner2 cleaner_pano;
+		cleaner3 cleaner_solido;
 
 	aslSourcePath:
 		"src/asl";

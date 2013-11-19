@@ -73,9 +73,17 @@ public class CleanerWorld extends TimeSteppedEnvironment {
 		 // add perception for all agents
 		 clearPercepts();
 		 addPercept(Literal.parseLiteral("grid_size("+ WorldModel.N +")"));
+		 
+		 updateAgsPercept();
+		 
+//		 for (int i = 0; i < model.getNbOfAgs(); i++) {
+//			  Literal tool =  Literal.parseLiteral("tool("+Ferramentas.values()[i%3].toString() +")");
+//			  logger.info("Agente "+getAgNameFromID(i)+"    Addpercept: " + tool);
+//	            addPercept(getAgNameFromID(i), tool);
+//	     }
 
     	//addPercept(Literal.parseLiteral("prob_emp("+ WorldModel.P));
-		 updateAgsPercept();
+		 
 	}
 
 	@Override
@@ -85,26 +93,26 @@ public class CleanerWorld extends TimeSteppedEnvironment {
      // get the agent id based on its name
         int agId = getAgIdBasedOnName(ag);
 
-        logger.info(ag+" ID: "+ agId);
+        //logger.info(ag+" ID: "+ agId);
         try {
             if (action.equals(up)) {
-            	logger.info(ag+" doing: "+ action);
+            	//logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.UP, agId);
             } 
             else if (action.equals(down)) {
-            	logger.info(ag+" doing: "+ action);
+            	//logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.DOWN, agId);
             } 
             else if (action.equals(left)) {
-            	logger.info(ag+" doing: "+ action);
+            	//.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.LEFT, agId);
             } 
             else if (action.equals(right)) {
-            	logger.info(ag+" doing: "+ action);
+            	//logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.RIGHT, agId);
             }
             else if (action.getFunctor().equals("clean")) {
-            	logger.info(ag+" doing: "+ action);
+            	//logger.info(ag+" doing: "+ action);
             	String toolS = action.getTerm(0).toString();
             	int tool = Ferramentas.valueOf(toolS.toUpperCase()).ordinal();
             	//int tool = WorldModel.translator.LiteralToInt(toolS);
@@ -112,6 +120,8 @@ public class CleanerWorld extends TimeSteppedEnvironment {
             } else {
                 return false;
             }
+            
+            Thread.sleep(5);
         } catch (Exception e) {
         	logger.log(Level.SEVERE, "error executing " + action + " for " + ag + " (ag code:"+agId+")", e);
         }
@@ -126,8 +136,8 @@ public class CleanerWorld extends TimeSteppedEnvironment {
     
     @Override
     public void updateAgsPercept() {
-    	logger.info("Number of Agents: " +model.getNbOfAgs());
-        for (int i = 0; i < model.getNbOfAgs()-1; i++) {
+    	//logger.info("Number of Agents: " +model.getNbOfAgs());
+        for (int i = 0; i < model.getNbOfAgs(); i++) {
             updateAgPercept(i);
         }
     }
@@ -140,15 +150,18 @@ public class CleanerWorld extends TimeSteppedEnvironment {
         clearPercepts(agName);
         // its location
         Location l = model.getAgPos(ag);
-        logger.info(agName+" location: "+ l);
+        //logger.info(agName+" location: "+ l);
         
-        Literal p = ASSyntax.createLiteral("pos", 
+        Literal pos = ASSyntax.createLiteral("pos", 
                 ASSyntax.createNumber(l.x), 
-                ASSyntax.createNumber(l.y), 
+                ASSyntax.createNumber(l.y));
+       
+        addPercept(agName, pos);
+        
+        Literal step = ASSyntax.createLiteral("step", 
                 ASSyntax.createNumber(getStep()));
-        
-        
-        addPercept(agName, p);
+    	addPercept(agName, step);
+    	 
 
         updateAgPercept(agName, l.x, l.y);
         updateAgPercept(agName, l.x+1, l.y);
@@ -194,7 +207,7 @@ public class CleanerWorld extends TimeSteppedEnvironment {
         }
 
         sum += time;
-        logger.info("Cycle "+step+" finished in "+time+" ms, mean is "+(sum/step)+".");
+        //logger.info("Cycle "+step+" finished in "+time+" ms, mean is "+(sum/step)+".");
         
         // test end of match
         try {

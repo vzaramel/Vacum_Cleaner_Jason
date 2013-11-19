@@ -19,7 +19,7 @@ public class WorldModel extends GridWorldModel {
     	public static final String AgName = "cleaner";
     	
     	public static final int N = 10; // grid size
-    	public static final float P = 0.001f; // propabilidade de ter empecilho
+    	public static final float P = 0.0005f; // propabilidade de ter empecilho
     	public static final int S = 1; // Fator de vizinhança
     	public static int T = 0; //Tempo
     	
@@ -66,11 +66,13 @@ public class WorldModel extends GridWorldModel {
         
         protected WorldModel() {
         	
-			super(N, N, 2);
+			super(N, N, 3);
 			try {
 					num_actions_ag = new int[getNbOfAgs()];
 					
 					setAgPos(0, 0, 0);
+					setAgPos(1, N-1, N-1);
+					setAgPos(2, N/2, N/2);
 	                constructWorld();
 	                
             } catch (Exception e) {
@@ -96,7 +98,7 @@ public class WorldModel extends GridWorldModel {
 	        			
 	        			if ( random.nextFloat() < probabilidade)
 	        			{
-	        				logger.info("Empecilho: " + emp + "  Ordinal: "+emp.value+" Adicionado em (" + loc + ")");
+	        				//logger.info("Empecilho: " + emp + "  Ordinal: "+emp.value+" Adicionado em (" + loc + ")");
 	        				add(emp.value, loc);
 	        			
 	        			}
@@ -127,7 +129,7 @@ public class WorldModel extends GridWorldModel {
             }
             if ( inGrid(loc))
             {
-            	logger.info("InGrid "+ loc);
+            	//logger.info("InGrid "+ loc);
             	setAgPos(ag, loc);
             }
         }
@@ -137,11 +139,12 @@ public class WorldModel extends GridWorldModel {
         	Location agLoc = getAgPos(ag);
         	int obj = Objetos.values()[toolIndex].value;
         	
+        	
         	num_actions_ag[ag]++;
         	if ( hasObject(obj, agLoc) )
 			{
 				COLLECTED++;
-				logger.info("Removing Empecilho Codigo: "+ Objetos.values()[toolIndex]);
+				//logger.info("Removing Empecilho Codigo: "+ Objetos.values()[toolIndex]);
 				remove(obj,agLoc);
 		    }
 			

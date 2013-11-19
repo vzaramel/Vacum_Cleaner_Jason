@@ -141,8 +141,12 @@ public class WorldView extends GridWorldView {
             if (jCycle != null) {
                 jCycle.setText(""+c);
                 jCollected.setText(""+ WorldModel.COLLECTED);
-                jAction.setText(""+WorldModel.num_actions_ag[0]);
-                jEfficiency.setText(""+ ((float)WorldModel.COLLECTED)/((float)WorldModel.num_actions_ag[0]));
+                int actions = 0;
+                for ( int nAct : WorldModel.num_actions_ag){
+                	actions += nAct;
+                }
+                jAction.setText(""+actions);
+                jEfficiency.setText(""+ ((float)WorldModel.COLLECTED)/((float)actions));
                 
             }
         }
