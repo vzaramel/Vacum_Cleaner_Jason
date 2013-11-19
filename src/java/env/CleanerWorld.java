@@ -1,24 +1,17 @@
+package env;
 // Environment code for project vacuum_cleaner
 
 import jason.asSyntax.*;
 import jason.environment.*;
 import java.util.logging.*;
 
-import jason.asSyntax.*;
-import jason.environment.Environment;
-import jason.environment.TimeSteppedEnvironment.OverActionsPolicy;
-import jason.environment.grid.GridWorldModel;
-import jason.environment.grid.GridWorldView;
 import jason.environment.grid.Location;
-import jason.stdlib.foreach;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.util.Random;
 import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
+
+import env.WorldModel.Ferramentas;
+import env.WorldModel.Objetos;
 
 
 public class CleanerWorld extends TimeSteppedEnvironment {
@@ -44,7 +37,6 @@ public class CleanerWorld extends TimeSteppedEnvironment {
 
         // get the parameters
         setSleep(100);
-        
         model = new WorldModel();
         view  = new WorldView(model);
         model.setView(view);
@@ -73,7 +65,7 @@ public class CleanerWorld extends TimeSteppedEnvironment {
 		
     	//Comando necessário para funcionameto
     	//Se retirar isso o programa gera uma nullPointer na inicialização
-		 super.init(new String[] { "5000" } ); // set step timeout 
+		 super.init(new String[] { "1000" } ); // set step timeout 
 		 
 		/******************************************************************/ 
 		 updateNumberOfAgents();
@@ -88,7 +80,7 @@ public class CleanerWorld extends TimeSteppedEnvironment {
 
 	@Override
     public boolean executeAction(String ag, Structure action) {
-        logger.info(ag+" doing: "+ action);
+        //logger.info(ag+" doing: "+ action);
         
      // get the agent id based on its name
         int agId = getAgIdBasedOnName(ag);
@@ -96,20 +88,26 @@ public class CleanerWorld extends TimeSteppedEnvironment {
         logger.info(ag+" ID: "+ agId);
         try {
             if (action.equals(up)) {
+            	logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.UP, agId);
             } 
             else if (action.equals(down)) {
+            	logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.DOWN, agId);
             } 
-            if (action.equals(left)) {
+            else if (action.equals(left)) {
+            	logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.LEFT, agId);
             } 
-            if (action.equals(right)) {
+            else if (action.equals(right)) {
+            	logger.info(ag+" doing: "+ action);
                 model.move(WorldModel.Move.RIGHT, agId);
             }
             else if (action.getFunctor().equals("clean")) {
+            	logger.info(ag+" doing: "+ action);
             	String toolS = action.getTerm(0).toString();
-            	int tool = WorldModel.translator.LiteralToInt(toolS);
+            	int tool = Ferramentas.valueOf(toolS.toUpperCase()).ordinal();
+            	//int tool = WorldModel.translator.LiteralToInt(toolS);
             	model.clean(tool, agId);
             } else {
                 return false;
@@ -153,20 +151,23 @@ public class CleanerWorld extends TimeSteppedEnvironment {
         addPercept(agName, p);
 
         updateAgPercept(agName, l.x, l.y);
+        updateAgPercept(agName, l.x+1, l.y);
+        updateAgPercept(agName, l.x-1, l.y);
+        updateAgPercept(agName, l.x, l.y+1);
+        updateAgPercept(agName, l.x, l.y-1);
     }
     private void updateAgPercept(String agName, int x, int y) {
         if (model == null || !model.inGrid(x,y)) return;
-        for( int empecilho : WorldModel.EE){
-	        if (model.hasObject(empecilho, x, y)) {
-	        	addPercept(agName,createCellPerception(x, y, empecilho));
+        for( Objetos empecilho : WorldModel.Objetos.values()){
+        	if (model.hasObject(empecilho.value, x, y)) {
+	        	addPercept(agName,createCellPerception(x, y, empecilho.toString()));
 	        }
         }
        
     }
     
-    public static Literal createCellPerception(int x, int y, int empCode) {
-    	String empStr = WorldModel.translator.IntToLiteral(empCode);
-        return ASSyntax.createLiteral("cell",
+    public static Literal createCellPerception(int x, int y, String empStr) {
+    	return ASSyntax.createLiteral("cell",
                 ASSyntax.createNumber(x),
                 ASSyntax.createNumber(y),
                 ASSyntax.createAtom(empStr)); 
@@ -179,6 +180,7 @@ public class CleanerWorld extends TimeSteppedEnvironment {
     
     @Override
     protected void stepStarted(int step) {
+    	if ( model!= null) model.setCycle();
         if (view != null) view.setCycle(getStep());
     }
     

@@ -1,3 +1,4 @@
+package env;
 import jason.environment.grid.GridWorldView;
 
 import java.awt.BorderLayout;
@@ -7,11 +8,20 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import sun.java2d.pipe.DrawImage;
+
+import env.WorldModel.Objetos;
 
 
 
@@ -24,10 +34,26 @@ public class WorldView extends GridWorldView {
 	    JLabel 	   jCollected;
 	    JLabel     jEfficiency;
 	    JLabel     jAction;
-	
 	    
+		private BufferedImage po;
+		private BufferedImage liquido;
+		private BufferedImage solido;
+		private BufferedImage android;
+		
+		static Logger logger = Logger.getLogger(WorldView.class.getName());
+		
         public WorldView(WorldModel model) {
             super(model, "Mars World", 600);
+            
+            try {
+    			solido =  ImageIO.read(new File("img" + File.separator + "solido.png"));
+    			po =      ImageIO.read(new File("img" + File.separator + "po.png"));
+    			liquido = ImageIO.read(new File("img" + File.separator + "liquido.png"));
+    			android = ImageIO.read(new File("img" + File.separator + "android.png"));
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+            
             defaultFont = new Font("Arial", Font.BOLD, 18); // change default font
             setVisible(true);
             repaint();
@@ -69,7 +95,7 @@ public class WorldView extends GridWorldView {
                     int lin = e.getY() / cellSizeH;
                     if (col >= 0 && lin >= 0 && col < getModel().getWidth() && lin < getModel().getHeight()) {
                         WorldModel wm = (WorldModel)model;
-                        wm.add(WorldModel.PO, col, lin);
+                        wm.add(Objetos.PO.value, col, lin);
                         //wm.setInitialNbGolds(wm.getInitialNbGolds()+1);
                         update(col, lin);
                     }
@@ -83,44 +109,40 @@ public class WorldView extends GridWorldView {
         /** draw application objects */
         @Override
         public void draw(Graphics g, int x, int y, int object) {
-        	
-            switch (object) {
-                case WorldModel.PO: 
-                	drawGarb(g, x, y);  
+        	  
+        	int objIndex = Objetos.getIndex(object);
+        	switch (Objetos.values()[objIndex]) {
+                case PO: 
+                	drawObjeto(g, x, y, po);  
                 	break;
+				case LIQUIDO:
+					drawObjeto(g, x, y, liquido);  
+					break;
+				case SOLIDO:
+					drawObjeto(g, x, y, solido);  
+					break;
+				default:
+					break;
             }
         }
 
         @Override
         public void drawAgent(Graphics g, int x, int y, Color c, int id) {
             String label = "R"+(id+1);
-            c = Color.blue;
-    
-            if (id == 0) {
-                c = Color.yellow;
-            }
-            super.drawAgent(g, x, y, c, -1);
-            if (id == 0) {
-                g.setColor(Color.black);
-            } else {
-                g.setColor(Color.white);                
-            }
+            g.drawImage(android, x*cellSizeW, y*cellSizeH, cellSizeW, cellSizeH, null);
             super.drawString(g, x, y, defaultFont, label);
         }
 
-        public void drawGarb(Graphics g, int x, int y) {
-            super.drawObstacle(g, x, y);
-            g.setColor(Color.white);
-            drawString(g, x, y, defaultFont, "G");
+        public void drawObjeto(Graphics g, int x, int y, BufferedImage obj) {
+        	g.drawImage(obj, x*cellSizeW, y*cellSizeH, cellSizeW, cellSizeH, null);
         }
         
         public void setCycle(int c) {
             if (jCycle != null) {
-                WorldModel wm = (WorldModel)model;
                 jCycle.setText(""+c);
                 jCollected.setText(""+ WorldModel.COLLECTED);
                 jAction.setText(""+WorldModel.num_actions_ag[0]);
-                jEfficiency.setText(""+ ((float)WorldModel.num_actions_ag[0])/((float)c));
+                jEfficiency.setText(""+ ((float)WorldModel.COLLECTED)/((float)WorldModel.num_actions_ag[0]));
                 
             }
         }
